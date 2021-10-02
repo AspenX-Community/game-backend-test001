@@ -1,0 +1,21 @@
+@charset "utf-8";
+
+@import "estrutura.css";
+
+
+#latencia_painel{
+    background-color: var(--main-color);
+    color: var(--text-color);
+    margin-right: auto;
+    border-radius: 4px;
+    margin-left: auto;
+    font-size: 0.8rem;
+    position: fixed;
+    width: 128px;
+    padding: 6px;
+    margin: 6px;
+    right: 0;
+}
+#latencia_painel_value{
+    color: var(--link-color);
+}

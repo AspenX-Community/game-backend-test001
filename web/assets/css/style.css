@@ -1,0 +1,10 @@
+:root {
+    
+    /* Cores de fundo  */
+   --main-color: #333;
+   --main-hover-color: rgb(77, 77, 77);
+   --body-color: #000;
+   /* Cores de textos  */
+   --text-color: #eee;
+   --link-color: rgb(34, 109, 221);
+}

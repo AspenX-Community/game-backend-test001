@@ -1,0 +1,23 @@
+@import "style.css";
+
+* {
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+}
+body{
+    background-color: var(--body-color);
+}
+nav{
+    position:fixed;
+    height: 100vh;
+    width: auto;
+    min-width: 32px;
+    background-color: var(--main-color);
+}
+nav:hover{
+    background-color: var(--main-hover-color);
+}
+div[role="main"]{
+    background-color: var(--body-color);
+}
