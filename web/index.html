@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+  </head>
+  <body>
+    <div>Latencia: <strong id="latencia"></strong></div>
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+        var socket = io();
+        var s2 = io("/chat");
+
+        setInterval(function() {
+            startTime = Date.now();
+            socket.emit('ping');
+        }, 2000);
+
+        socket.on('pong', function() {
+            latency = Date.now() - startTime;
+            $("#latencia").text(latency);
+        });
+        socket.on('reply', function(msg){
+            let result = "";
+            if(Number(msg) > 1){
+                result += ((new Date().getTime() - new Date(msg * 1).getTime() ) / 1000) +"s"
+            }
+            $('#messages').append($('<li>').text(" --->  " + result));
+
+        });
+
+        $('form').submit(function(){
+            s2.emit('msg', $('#m').val(), function(data){
+             $('#messages').append($('<li>').text('INFO: ' + data));
+            });
+
+            socket.emit('notice', $('#m').val());
+
+            $('#m').val('');
+            setInterval(function(){
+
+                socket.emit('notice', new Date().getTime()+"" );
+
+            },700)
+
+            return false;
+        });
+    </script>
+  </body>
+</html>
