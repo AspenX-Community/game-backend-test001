@@ -1,3 +1,3 @@
 [submodule "game-frontend"]
 	path = web
-	url = https://github.com/AspenX-Community/game-frontend-test001.git
+	url = ../game-frontend-test001.git
