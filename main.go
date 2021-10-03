@@ -1,18 +1,19 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"runtime"
 
 	socketio "github.com/googollee/go-socket.io"
 )
 
 type Usuario struct {
-	id   string
-	nome string
-	com  *socketio.Conn
+	Id       string `json:"id"`
+	Nome     string `json:"nome"`
+	Position string `json:"position"`
+	com      *socketio.Conn
 }
 
 // Lista de Usuarios conectados
@@ -26,20 +27,41 @@ func main() {
 
 	server.OnConnect("/", func(s socketio.Conn) error {
 		s.SetContext("")
-		//id := uuid.New().String()
 
-		clientes[s.ID()] = Usuario{
-			id:  s.ID(),
-			com: &s,
+		client := Usuario{
+			Id:   s.ID(),
+			Nome: "BaconVegano" + string(s.ID()),
+			com:  &s,
 		}
+		data, _ := json.Marshal(client)
+		for id := range clientes {
+			var com = *clientes[id].com
+			com.Emit("new-player", string(data))
+			dataUser, _ := json.Marshal(clientes[id])
+			s.Emit("new-player", string(dataUser))
+		}
+		clientes[s.ID()] = client
+
 		fmt.Println("connected:", s.ID())
 		//PrintMemUsage()
 		fmt.Println("Clientes: ", len(clientes))
 		return nil
 	})
-    // LATENCIA 
+	// LATENCIA
 	server.OnEvent("/", "ping", func(s socketio.Conn, msg string) {
 		s.Emit("pong")
+	})
+	server.OnEvent("/", "move-player", func(s socketio.Conn, msg string) {
+		client := clientes[s.ID()]
+		client.Position = msg
+		data, _ := json.Marshal(client)
+		for id := range clientes {
+			if id == s.ID() {
+				continue
+			}
+			var com = *clientes[id].com
+			com.Emit("move-player", string(data))
+		}
 	})
 
 	server.OnEvent("/", "notice", func(s socketio.Conn, msg string) {
@@ -49,13 +71,10 @@ func main() {
 			var com = *clientes[id].com
 			com.Emit("reply", ""+msg)
 		}
-		fmt.Println("Clientes: ", len(clientes))
-		//PrintMemUsage()
 	})
 
 	server.OnEvent("/chat", "msg", func(s socketio.Conn, msg string) string {
 		s.SetContext(msg)
-		fmt.Println("Clientes: ", len(clientes))
 		return "enviado... " + msg
 	})
 
@@ -71,7 +90,6 @@ func main() {
 	})
 
 	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
-		fmt.Println("Clientes: ", len(clientes))
 		delete(clientes, s.ID())
 		fmt.Println("closed", reason)
 	})
@@ -87,7 +105,7 @@ func main() {
 
 // PrintMemUsage outputs the current, total and OS memory being used. As well as the number
 // of garage collection cycles completed.
-func PrintMemUsage() {
+/*func PrintMemUsage() {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	// For info on each, see: https://golang.org/pkg/runtime/#MemStats
@@ -102,4 +120,4 @@ func PrintMemUsage() {
 
 func bToMb(b uint64) uint64 {
 	return b / 1024 / 1024
-}
+}*/
